@@ -181,7 +181,7 @@ class isAlert:
 
             try:
                 pt = (rd2.prc[ir] - rd1.prc[ir]) / rd1.prc[ir]
-            except ValueError:
+            except ZeroDivisionError:
                 pt = 0.
 
             if(rt > par.pc):
@@ -244,18 +244,18 @@ def trig_alert(mygui, par):
     count = 0
     sleep(int(par.dt * 60))
 
-    fo = fo_nomerge('AlertStatus')
-    fo.write(str(count) + '分钟：' + str(par.ln) + '\n')
+    # fo = fo_nomerge('AlertStatus')
+    # fo.write(str(count) + '分钟：' + str(par.ln) + '\n')
     while(count < 420 / par.dt):
         real_data2 = MyRealQts(par)
-        real_data2.vol = [i + 2000 for i in real_data1.vol]  # Only for test
+        # real_data2.vol = [i + 2000 for i in real_data1.vol]  # Only for test
         alert = isAlert(vol_hist, real_data1, real_data2, mygui, par)
         real_data1 = real_data2
         count = count + 1
-        fo.write(str(count) + '分钟：' + str(alert.status) + '\n')
+        # fo.write(str(count) + '分钟：' + str(alert.status) + '\n')
         sleep(int(par.dt * 60))
 
-    fo.close()
+    # fo.close()
     my_gui.update_disp('监控完成！')
 
 
