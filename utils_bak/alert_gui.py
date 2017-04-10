@@ -58,7 +58,7 @@ def StopFlash():
 
 
 def get_date():
-    'Get the date of today and yesterday'
+    """Get the date of today and yesterday"""
     tday = get_today()
     yday = last_tddate(tday)
     while is_holiday(str(yday)):
@@ -77,18 +77,18 @@ def day_last_week(date, days=-7):
 
 
 def trade_cal():
-    '''
+    """
             交易日历
     isOpen=1是交易日，isOpen=0为休市
-    '''
+    """
     df = read_csv(ts.stock.cons.ALL_CAL_FILE)
     return df
 
 
 def is_holiday(date):
-    '''
+    """
             判断是否为交易日，返回True or False
-    '''
+    """
     df = trade_cal()
     holiday = df[df.isOpen == 0]['calendarDate'].values
     if isinstance(date, str):
@@ -114,9 +114,11 @@ def ult_get_realtime_quotes(lines):
 
 
 def get_hist_vol(dpArea, date, pt):
-    'Get history volume'
+    """Get history volume"""
     global lines
-    vol_hist = [0 for i in range(len(lines))]
+    vol_hist = []
+    for i in range(len(lines)):
+        vol_hist.append(0)
     for ir in range(len(lines)):
         dfy = ts.get_hist_data(lines[ir], start=date, end=date)
         if dfy.empty:
@@ -124,7 +126,7 @@ def get_hist_vol(dpArea, date, pt):
             update_disp(dpArea, txt)
         else:
             vol_hist[ir] = dfy.iloc[0]['volume']
-        if(pt == 1 and vol_hist[ir] > 0):
+        if pt == 1 and vol_hist[ir] > 0:
             txt = str(lines[ir]) + ' ' + date + \
                 ' 日交易量为 ' + str(vol_hist[ir])
             update_disp(dpArea, txt)
@@ -135,7 +137,7 @@ def get_hist_vol(dpArea, date, pt):
 
 
 def get_real_vol(dpArea, pt):
-    'Get real-time volume'
+    """Get real-time volume"""
     global lines
     dft = ult_get_realtime_quotes(lines)
     vol_real = dft['volume'].tolist()
@@ -145,14 +147,14 @@ def get_real_vol(dpArea, pt):
     localtime = dft['time'].tolist()
     name = dft['name'].tolist()
     prc_real, prcc = get_price_change(dft)
-    if(pt == 1):
+    if pt == 1:
         txt = today + ' ' + str(localtime) + ' 时成交量为 ' + str(vol_real)
         update_disp(dpArea, txt)
     return vol_real, amt_real, prc_real, localtime, name, prcc
 
 
 def get_price_change(dft):
-    'Get real-time price change wrt. the close price of yesterday'
+    """Get real-time price change wrt. the close price of yesterday"""
     prc = dft['price'].tolist()
     prc = [float(i) for i in prc]
     prc_hist = dft['pre_close'].tolist()
@@ -165,12 +167,12 @@ def get_price_change(dft):
 
 def cal_vol(dpArea, vol_1, vol_2, vol_y, amnt_1, amnt_2, prc_1, prc_2,
             name, localtime, prcc, pt):
-    'Compute real-time volume within a short period'
+    """Compute real-time volume within a short period"""
     global n
     global perc
     atxt = ''
     for ir in range(len(vol_1)):
-        if(pt == 1):
+        if pt == 1:
             print(name[ir], localtime[ir], '起过去', str(n), '分钟内成交',
                   str(vol_2[ir] - vol_1[ir]))
         rt = (vol_2[ir] - vol_1[ir]) / vol_y[ir] * 100.
@@ -179,7 +181,7 @@ def cal_vol(dpArea, vol_1, vol_2, vol_y, amnt_1, amnt_2, prc_1, prc_2,
             pt = (prc_2[ir] - prc_1[ir]) / prc_1[ir]
         else:
             pt = 0.
-        if(rt > perc):
+        if rt > perc:
             atmp = chinese(str(name[ir]), 9) +\
                 "{:<10}".format(str(localtime[ir])) +\
                 "{:<9}".format(str(format(prcc[ir], '.2%'))) +\
@@ -196,7 +198,7 @@ def cal_vol(dpArea, vol_1, vol_2, vol_y, amnt_1, amnt_2, prc_1, prc_2,
 
 
 def trig_alert(dpArea, pt):
-    'Alert if the condition is satisfied'
+    """Alert if the condition is satisfied"""
     global yesterday
     global n
     global lines
@@ -209,8 +211,7 @@ def trig_alert(dpArea, pt):
         dpArea, pt)
     count = 0
     time.sleep(int(n * 60))
-    atxt = ''
-    while(count < 420 / n):
+    while count < 420 / n:
         vol_2, amt_2, prc_2, localtime, name, prcc = get_real_vol(
             dpArea, 0)
         # vol_2 = [i + 2000 for i in vol_1]  # Only for test
